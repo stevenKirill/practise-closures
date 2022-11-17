@@ -1,10 +1,14 @@
+// мой вариант
 function calculator() {
     var state = {
         result: 0,
         current: '',
+        currentSing: 0,
     }
-    const onlyNumbers = new Regex("^\\d+$");
-    const signs = /+|-|*|\//gi;
+
+    console.log(state, '=> state');
+    const onlyNumbers = /\d/;
+    const signs = /[+/*-]/;
     const operations = {
         '+': function(num1, num2) {
             return Number(num1) + Number(num2);
@@ -21,24 +25,22 @@ function calculator() {
     };
     return function (symbol) {
         if (onlyNumbers.test(symbol)) {
-            state.current += symbol;
+            state.current = symbol;
         }
         if (signs.test(symbol)) {
-            operations[symbol]()
+            state.currentSing = symbol;
         }
         if (symbol === '=') {
-            const { result } = state;
-            console.log(result)
+            let { result, currentSing, current } = state;
+            result = operations[currentSing](current, Number(symbol))
+            return result;
         }
     };
 }
 
-var calc = calculator();
-
 function useCalc(calc, keys) {
     return [...keys].reduce(function showDisplay(display, key) {
         var ret = String(calc(key));
-        console.log(ret, '=> ret');
         return (
             display + (
                 (ret !== '' && key === '=') ? '=' : ''
@@ -47,9 +49,14 @@ function useCalc(calc, keys) {
     }, '')
 }
 
-useCalc(calc, '4+3=') // 4+3=7
-// useCalc(calc, '+9=') // 7+9=16
-// useCalc(calc, '*8=') // 16*8=128
+var calc = calculator2();
+
+var first = useCalc(calc, '4+3=') // 4+3=7
+console.log(first)
+var second = useCalc(calc, '+9=') // 7+9=16
+console.log(second)
+var third = useCalc(calc, '*8=') // 16*8=128
+console.log(third)
 // useCalc(calc, '7*2*3') // 7*2*3=42
 // useCalc(calc, '1/0=') // 1/0=ERR
 // useCalc(calc, '+3') // +3=ERR
@@ -83,4 +90,46 @@ function formatTotal(display) {
         display = 'ERR'
     }
     return display;
+}
+
+// пример из учебника
+function calculator2() {
+    var currentTotal = 0;
+    var currentVal = '';
+    var currentOper = '=';
+    return pressKey;
+    // *******************
+    function pressKey(key) {
+        if (/\d/.test(key)) {
+            currentVal += key;
+            return key;
+        } else if (/[+*/-]/.test(key)) {
+            // серия из нескольких операций
+            if (currentOper !== '=' && currentVal !== '') {
+                // предполагается нажатие '='
+                pressKey('=')
+            } else if (currentVal !== '') {
+                currentTotal = Number(currentVal);
+            }
+            currentOper = key;
+            currentVal = '';
+            return key;
+        } else if (key === '=' && currentOper !== '=') {
+            currentTotal = op(currentTotal, currentOper, Number(currentVal));
+            currentOper = '=';
+            currentVal = '';
+            return formatTotal(currentTotal);
+        }
+        return ''
+    }
+
+    function op(val1, oper, val2) {
+        var ops = {
+            '+': (v1,v2) => v1 + v2,
+            '-': (v1, v2) => v1 - v2,
+            '*': (v1, v2) => v1 * v2,
+            '/': (v1, v2) => v1 / v2,
+        }
+        return ops[oper](val1, val2);
+    }
 }
