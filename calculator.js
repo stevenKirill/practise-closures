@@ -1,13 +1,12 @@
 // мой вариант
 function calculator() {
     var result = 0;
-    var currentDigit =  ''; // 4
-    var currentSing = '';
+    var currentDigit =  '';
+    var currentSing = '=';
     const onlyNumbers = /\d/;
     const signs = /[+/*-]/;
     var operations = {
         '+': function(num1, num2) {
-            console.log(Number(num1), '=> два вот этих числа')
             return Number(num1) + Number(num2);
         },
         '-': function(num1, num2) {
@@ -20,41 +19,37 @@ function calculator() {
             return Number(num1) / Number(num2);
         }
     };
-    function pressCalculatorBatton(symbol) {
-        console.log(currentDigit, '=> currentDigit')
-        console.log(currentSing, '=> currentSing')
+    function pressCalculatorButton(symbol) {
+        // если это число то сохраним в переменную текущее
         if (onlyNumbers.test(symbol)) {
-            console.log(symbol, '=> цифры')
             currentDigit += symbol;
-            return;
+            return symbol;
         } else if (signs.test(symbol)) {
-            console.log(symbol, '=> знак')
             // кейс серии из нескольких операций
             if (currentSing !== '=' && currentDigit !== '') {
-                pressCalculatorBatton('=');
+                pressCalculatorButton('=');
             } else if (currentDigit !== '') {
-                result = Number(symbol);
-                return 
+                result = Number(currentDigit);
             }
             currentSing = symbol;
             currentDigit = '';
-            return;
-        } else if (symbol === '=' && currentSing !== '') {
-            result = operations[currentSing](currentDigit, symbol)
+            return symbol;
+        } else if (symbol === '=' && currentSing !== '=') {
+            result = operations[currentSing](Number(currentDigit), result)
             currentSing = '=';
             currentDigit = '';
             return formatTotal(result);
         }
     };
-    return pressCalculatorBatton;
+    return pressCalculatorButton;
 }
 
 var calc = calculator();
 
 var first = useCalc(calc, '4+3=') // 4+3=7
-console.log(first, '=> первый результат')
-// var second = useCalc(calc, '+9=') // 7+9=16
-// console.log(second)
+console.log(first)
+var second = useCalc(calc, '+9=') // 7+9=16
+console.log(second)
 // var third = useCalc(calc, '*8=') // 16*8=128
 // console.log(third)
 // useCalc(calc, '7*2*3') // 7*2*3=42
